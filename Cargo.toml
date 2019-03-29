@@ -1,0 +1,8 @@
+[package]
+name = "common_macros"
+version = "0.0.1-wip"
+authors = ["Philipp Korber <philippkorber@gmail.com>"]
+description = "Provides common macros like `hash_map!` or `hash_set!` (WIP)"
+edition = "2018"
+
+[dependencies]
