@@ -55,6 +55,7 @@ macro_rules! const_expr_count {
 
 /// Macro to crate a `HashMap` with a number of key-value pairs in it.
 ///
+///
 /// # Examples
 ///
 /// ```
@@ -67,6 +68,19 @@ macro_rules! const_expr_count {
 /// ```
 #[macro_export]
 macro_rules! hash_map {
+    (with $map:expr; insert { $($key:expr => $val:expr),* , }) => (
+        $crate::hash_map!(with $map; insert { $($key => $val),* })
+    );
+    (with $map:expr; insert { $($key:expr => $val:expr),* }) => ({
+        let count = $crate::const_expr_count!($($key);*);
+        #[allow(unused_mut)]
+        let mut map = $map;
+        map.reserve(count);
+        $(
+            map.insert($key, $val);
+        )*
+        map
+    });
     ($($key:expr => $val:expr),* ,) => (
         $crate::hash_map!($($key => $val),*)
     );
@@ -90,6 +104,19 @@ macro_rules! hash_map {
 /// ```
 #[macro_export]
 macro_rules! hash_set {
+    (with $set:expr; insert { $($item:expr),* , }) => (
+        $crate::hash_set!(with $set; insert { $($item),* })
+    );
+    (with $set:expr; insert { $($item:expr),* }) => ({
+        let count = $crate::const_expr_count!($($item);*);
+        #[allow(unused_mut)]
+        let mut set = $set;
+        set.reserve(count);
+        $(
+            set.insert($item);
+        )*
+        set
+    });
     ($($item:expr),* ,) => (
         $crate::hash_set!($($item),*)
     );
@@ -116,6 +143,17 @@ macro_rules! hash_set {
 /// ```
 #[macro_export]
 macro_rules! b_tree_map {
+    (with $map:expr; insert { $($key:expr => $val:expr),* , }) => (
+        $crate::b_tree_map!(with $map; insert { $($key => $val),* })
+    );
+    (with $map:expr; insert { $($key:expr => $val:expr),* }) => ({
+        #[allow(unused_mut)]
+        let mut map = $map;
+        $(
+            map.insert($key, $val);
+        )*
+        map
+    });
     ($($key:expr => $val:expr),* ,) => (
         $crate::b_tree_map!($($key => $val),*)
     );
@@ -138,6 +176,17 @@ macro_rules! b_tree_map {
 /// ```
 #[macro_export]
 macro_rules! b_tree_set {
+    (with $set:expr; insert { $($item:expr),* , }) => (
+        $crate::b_tree_set!(with $set; insert { $($item),* })
+    );
+    (with $set:expr; insert { $($item:expr),* }) => ({
+        #[allow(unused_mut)]
+        let mut set = $set;
+        $(
+            set.insert($item);
+        )*
+        set
+    });
     ($($item:expr),* ,) => (
         $crate::b_tree_set!($($item),*)
     );
@@ -214,6 +263,29 @@ mod tests {
             assert_eq!(map.get(&1), Some(&2));
             assert_eq!(map.len(), 1);
         }
+
+        #[test]
+        fn can_insert_instead_of_create() {
+            let mut map = HashMap::new();
+
+            hash_map!{
+                with &mut map; insert {
+                    1u8 => 2u8,
+                    2 => 12,
+                }
+            };
+
+            let map = hash_map!{
+                with map; insert {
+                    12 => 32
+                }
+            };
+
+            assert_eq!(map.get(&1), Some(&2));
+            assert_eq!(map.get(&2), Some(&12));
+            assert_eq!(map.get(&12), Some(&32));
+            assert_eq!(map.len(), 3);
+        }
     }
 
     mod hash_set {
@@ -242,6 +314,19 @@ mod tests {
             let set = hash_set!{ 1u8, };
             assert!(set.contains(&1));
             assert_eq!(set.len(), 1);
+        }
+
+        #[test]
+        fn can_insert_instead_of_create() {
+            let mut set = HashSet::new();
+
+            hash_set!{with &mut set; insert { 1u8, 2 }};
+
+            let set = hash_set!{with set; insert { 12 }};
+            assert!(set.contains(&1));
+            assert!(set.contains(&2));
+            assert!(set.contains(&12));
+            assert_eq!(set.len(), 3);
         }
     }
 
@@ -279,6 +364,29 @@ mod tests {
             assert_eq!(map.get(&1), Some(&2));
             assert_eq!(map.len(), 1);
         }
+
+        #[test]
+        fn can_insert_instead_of_create() {
+            let mut map = BTreeMap::new();
+
+            b_tree_map!{
+                with &mut map; insert {
+                    1u8 => 2u8,
+                    2 => 12,
+                }
+            };
+
+            let map = b_tree_map!{
+                with map; insert {
+                    12 => 32
+                }
+            };
+
+            assert_eq!(map.get(&1), Some(&2));
+            assert_eq!(map.get(&2), Some(&12));
+            assert_eq!(map.get(&12), Some(&32));
+            assert_eq!(map.len(), 3);
+        }
     }
 
     mod b_tree_set {
@@ -307,6 +415,19 @@ mod tests {
             let set = b_tree_set!{ 1u8, };
             assert!(set.contains(&1));
             assert_eq!(set.len(), 1);
+        }
+
+        #[test]
+        fn can_insert_instead_of_create() {
+            let mut set = BTreeSet::new();
+
+            b_tree_set!{with &mut set; insert { 1u8, 2 }};
+
+            let set = b_tree_set!{with set; insert { 12 }};
+            assert!(set.contains(&1));
+            assert!(set.contains(&2));
+            assert!(set.contains(&12));
+            assert_eq!(set.len(), 3);
         }
     }
 }
