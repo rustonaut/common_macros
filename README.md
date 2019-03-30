@@ -1,6 +1,6 @@
 # common_macros [![Crates.io](https://img.shields.io/crates/v/common_macros.svg)](https://crates.io/crates/common_macros) [![common_macros](https://docs.rs/common_macros/badge.svg)](https://docs.rs/common_macros) [![maintenance](https://img.shields.io/badge/maintenance-passively--maintained-blue.svg)](https://img.shields.io/badge/maintenance-passively--maintained-blue.svg) [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-**provides common macros like `hash_map!`
+**provides common macros like `hash_map!`**
 
 ---
 

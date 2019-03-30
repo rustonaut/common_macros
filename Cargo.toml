@@ -12,3 +12,7 @@ documentation = "https://docs.rs/common_macros"
 repository = "https://github.com/rustonaut/common_macros"
 
 [dependencies]
+
+
+[badges]
+maintenance = { status = "passively-maintained" }
