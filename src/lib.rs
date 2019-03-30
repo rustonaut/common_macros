@@ -26,22 +26,22 @@ macro_rules! const_expr_count {
     );
 }
 
-
+/// This
 #[macro_export]
 macro_rules! insert {
-    (into $name:expr; pairs { $($key:expr => $val:expr),* }) => ({
+    (into $name:expr; map { $($key:expr => $val:expr),* }) => ({
         let mut _container = $name;
         $(
             _container.insert($key, $val);
         )*
     });
-    (into $name:expr; pairs { $($key:expr => $val:expr),* , }) => ({
-        $crate::insert!(into $name; pairs { $($key => $val),* })
+    (into $name:expr; map { $($key:expr => $val:expr),* , }) => ({
+        $crate::insert!(into $name; map { $($key => $val),* })
     });
-    (into $name:expr; items { $($i:expr),* , }) => ({
-        $crate::insert!(into $name; items { $($i),* })
+    (into $name:expr; set { $($i:expr),* , }) => ({
+        $crate::insert!(into $name; set { $($i),* })
     });
-    (into $name:expr; items { $($i:expr),* }) => ({
+    (into $name:expr; set { $($i:expr),* }) => ({
         let mut _container = $name;
         $(
             _container.insert($i);
@@ -57,7 +57,7 @@ macro_rules! hash_map {
     ($($key:expr => $val:expr),*) => ({
         let start_capacity = $crate::const_expr_count!($($key);*);
         let mut map = ::std::collections::HashMap::with_capacity(start_capacity);
-        $crate::insert!(into &mut map; pairs { $($key => $val),* });
+        $crate::insert!(into &mut map; map { $($key => $val),* });
         map
     });
 }
@@ -70,7 +70,7 @@ macro_rules! hash_set {
     ($($item:expr),*) => ({
         let start_capacity = $crate::const_expr_count!($($item);*);
         let mut set = ::std::collections::HashSet::with_capacity(start_capacity);
-        $crate::insert!(into &mut set; items { $($item),* });
+        $crate::insert!(into &mut set; set { $($item),* });
         set
     });
 }
@@ -82,7 +82,7 @@ macro_rules! b_tree_map {
     );
     ($($key:expr => $val:expr),*) => ({
         let mut map = ::std::collections::BTreeMap::new();
-        $crate::insert!(into &mut map; pairs { $($key => $val),* });
+        $crate::insert!(into &mut map; map { $($key => $val),* });
         map
     });
 }
@@ -94,7 +94,7 @@ macro_rules! b_tree_set {
     );
     ($($item:expr),*) => ({
         let mut set = ::std::collections::BTreeSet::new();
-        $crate::insert!(into &mut set; items { $($item),* });
+        $crate::insert!(into &mut set; set { $($item),* });
         set
     });
 }
@@ -134,9 +134,9 @@ mod tests {
         use std::collections::{HashSet, HashMap};
 
         #[test]
-        fn can_insert_key_value_pairs() {
+        fn can_insert_key_value_map() {
             let mut map = HashMap::new();
-            insert!(into &mut map; pairs {
+            insert!(into &mut map; map {
                 "hy" => 1u8,
                 "ho" => 2
             });
@@ -146,16 +146,16 @@ mod tests {
         }
 
         #[test]
-        fn can_insert_no_kv_pairs() {
+        fn can_insert_no_kv_map() {
             let mut map = HashMap::<u8,u8>::new();
-            insert!(into &mut map; pairs {});
+            insert!(into &mut map; map {});
             assert_eq!(map.len(), 0);
         }
 
         #[test]
         fn can_insert_items_into_set() {
             let mut set = HashSet::new();
-            insert!(into &mut set; items { 1u8, 2u8 });
+            insert!(into &mut set; set { 1u8, 2u8 });
             assert!(set.contains(&1u8));
             assert!(set.contains(&2u8));
             assert_eq!(set.len(), 2);
@@ -164,7 +164,7 @@ mod tests {
         #[test]
         fn can_insert_no_items_into_set() {
             let mut set = HashSet::<u8>::new();
-            insert!(into &mut set; items {  });
+            insert!(into &mut set; set {  });
             assert_eq!(set.len(), 0);
         }
 
@@ -174,7 +174,7 @@ mod tests {
 
             let mut wrap = Wrap { inner: HashMap::new() };
 
-            insert!(into &mut wrap.inner; pairs {
+            insert!(into &mut wrap.inner; map {
                 12 => 13
             });
 
@@ -183,9 +183,9 @@ mod tests {
         }
 
         #[test]
-        fn allow_trailing_comma_in_pairs_insertion() {
+        fn allow_trailing_comma_in_map_insertion() {
             let mut map = HashMap::new();
-            insert!(into &mut map; pairs {
+            insert!(into &mut map; map {
                 "hy" => 1u8,
                 "ho" => 2,
             });
@@ -197,7 +197,7 @@ mod tests {
         #[test]
         fn allow_trailing_comma_in_items_insertion() {
              let mut set = HashSet::new();
-            insert!(into &mut set; items { 1u8, 2u8, });
+            insert!(into &mut set; set { 1u8, 2u8, });
             assert!(set.contains(&1u8));
             assert!(set.contains(&2u8));
             assert_eq!(set.len(), 2);
