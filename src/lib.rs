@@ -262,6 +262,14 @@ macro_rules! b_tree_set {
     });
 }
 
+/// Concats a number of string literals inserting a "\n" between each of them.
+#[macro_export]
+macro_rules! lines {
+    ($first:expr $(, $tail:expr)*) => (
+        concat!($first $(, "\n", $tail)*)
+    );
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -492,6 +500,27 @@ mod tests {
             assert!(set.contains(&2));
             assert!(set.contains(&12));
             assert_eq!(set.len(), 3);
+        }
+    }
+
+    mod lines {
+
+        #[test]
+        fn handles_single_line() {
+            let res = lines!{"hy"};
+            assert_eq!(res, "hy");
+        }
+
+        #[test]
+        fn inserts_newline_between_lines() {
+            let res = lines!{ "hy", "there" };
+            assert_eq!(res, "hy\nthere");
+        }
+
+        #[test]
+        fn can_handle_raw_string_literals() {
+            let res = lines!{ "hy", r#"th"ere"# };
+            assert_eq!(res, "hy\nth\"ere");
         }
     }
 }
