@@ -55,6 +55,8 @@ macro_rules! const_expr_count {
 
 /// Macro to crate a `HashMap` with a number of key-value pairs in it.
 ///
+/// There is an alternate syntax, which allows insertion into an existing
+/// map (and still uses `const_expr_count!` to call `map.reserve()` with).
 ///
 /// # Examples
 ///
@@ -65,6 +67,26 @@ macro_rules! const_expr_count {
 ///     "joke" => true,
 ///     "cat" => true,
 /// };
+/// ```
+///
+/// ```
+/// use std::collections::HashMap;
+/// use common_macros::hash_map;
+///
+/// fn setup_map() -> HashMap<u8,u8> {
+///     HashMap::new()
+/// }
+///
+/// let mut map = hash_map!(with setup_map(); insert {
+///     12 => 13,
+///     13 => 56
+/// });
+///
+/// hash_map!(with &mut map; insert {
+///     44 => 45,
+///     48 => 112,
+///     1 => 4
+/// });
 /// ```
 #[macro_export]
 macro_rules! hash_map {
@@ -95,6 +117,9 @@ macro_rules! hash_map {
 
 /// Macro to create a `HashSet` with a number of items in it.
 ///
+/// Like for `HashMap` an alternate syntax for insertion exists,
+/// it also call `.reserve()` with the number of passed in items.
+///
 /// # Examples
 ///
 /// ```
@@ -102,6 +127,21 @@ macro_rules! hash_map {
 ///
 /// let is_fun_set = hash_set!{ "joke", "cat" };
 /// ```
+///
+/// ```
+/// use std::collections::HashSet;
+/// use common_macros::hash_set;
+///
+/// let mut set = HashSet::new();
+/// hash_set!(with &mut set; insert {
+///     "hy",
+///     "ho",
+///     "starts",
+///     "and",
+///     "so"
+/// });
+/// ```
+///
 #[macro_export]
 macro_rules! hash_set {
     (with $set:expr; insert { $($item:expr),* , }) => (
@@ -139,6 +179,30 @@ macro_rules! hash_set {
 /// let is_fun_map = b_tree_map!{
 ///     "joke" => true,
 ///     "cat" => true,
+/// };
+/// ```
+///
+/// Like `HashMap` and alternative insertion syntax exists:
+///
+/// ```
+/// use common_macros::b_tree_map;
+///
+/// let is_fun_map = b_tree_map!{
+///     "joke" => true
+/// };
+///
+/// let mut less_fun_map = b_tree_map!{
+///     with is_fun_map; insert {
+///         "explosion" => false,
+///         "psychos" => false
+///     }
+/// };
+///
+/// b_tree_map!{
+///     with &mut less_fun_map; insert {
+///         "cat" => true,
+///         "mosquito" => false
+///     }
 /// };
 /// ```
 #[macro_export]
