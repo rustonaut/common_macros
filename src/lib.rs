@@ -1,18 +1,45 @@
-//! This library will contains common macros.
+//! This library contains common macros.
 //!
-//! Mainly following macros:
-//!
-//! - `hash_map!`,
-//! - `hash_set!`,
-//! - `b_tree_map!`,
-//! - `b_tree_set!`,
-//! - `expr_count!`
-//! - `insert!` (generalization of map/set/vec insertion)
-//!
-//! I'm not sure if I will add common alt. assertion macros
-//! (e.g. `assert_ok!`, `assert_err!`, `assert_iter_eq!`).
+//! As this crate exports many different macros it is recommended
+//! not to use `#[macro_use] extern crate common_macros;` but instead
+//! to use the newer way of "just" importing the macros you need
+//! (e.g. `use common_macros::{hash_map, hash_set};`).
 //!
 
+
+/// Counts the number of `;` separated expressions passed in to the
+/// macro at compiler time.
+///
+/// This does count expressions containing other expressions just as
+/// one expression.
+///
+/// The macro can be used to e.g. get the right value for a `.with_capacity()`
+/// constructor at compiler time, i.e. it's normally used only by other macros.
+///
+///
+/// # Examples
+///
+/// ```
+/// use common_macros::const_expr_count;
+///
+/// macro_rules! my_vec {
+///     ($($item:expr),*) => ({
+///         let mut vec = Vec::with_capacity(const_expr_count! {$($item);*});
+///         $(
+///             //let's forget to insert the values
+///             if false {
+///                 vec.push($item);
+///             }
+///         )*
+///         vec
+///     });
+/// }
+///
+/// fn main() {
+///     let vec = my_vec![1u8,2,3,4];
+///     assert!(vec.capacity() >= 4);
+/// }
+/// ```
 #[macro_export]
 macro_rules! const_expr_count {
     () => (0);
@@ -26,7 +53,18 @@ macro_rules! const_expr_count {
     );
 }
 
-
+/// Macro to crate a `HashMap` with a number of key-value pairs in it.
+///
+/// # Examples
+///
+/// ```
+/// use common_macros::hash_map;
+///
+/// let is_fun_map = hash_map!{
+///     "joke" => true,
+///     "cat" => true,
+/// };
+/// ```
 #[macro_export]
 macro_rules! hash_map {
     ($($key:expr => $val:expr),* ,) => (
@@ -34,12 +72,22 @@ macro_rules! hash_map {
     );
     ($($key:expr => $val:expr),*) => ({
         let start_capacity = $crate::const_expr_count!($($key);*);
+        #[allow(unused_mut)]
         let mut map = ::std::collections::HashMap::with_capacity(start_capacity);
         $( map.insert($key, $val); )*
         map
     });
 }
 
+/// Macro to create a `HashSet` with a number of items in it.
+///
+/// # Examples
+///
+/// ```
+/// use common_macros::hash_set;
+///
+/// let is_fun_set = hash_set!{ "joke", "cat" };
+/// ```
 #[macro_export]
 macro_rules! hash_set {
     ($($item:expr),* ,) => (
@@ -47,30 +95,54 @@ macro_rules! hash_set {
     );
     ($($item:expr),*) => ({
         let start_capacity = $crate::const_expr_count!($($item);*);
+        #[allow(unused_mut)]
         let mut set = ::std::collections::HashSet::with_capacity(start_capacity);
         $( set.insert($item); )*
         set
     });
 }
 
+/// Macro to crate a `BTreeMap` with a number of key-value pairs in it.
+///
+/// # Examples
+///
+/// ```
+/// use common_macros::b_tree_map;
+///
+/// let is_fun_map = b_tree_map!{
+///     "joke" => true,
+///     "cat" => true,
+/// };
+/// ```
 #[macro_export]
 macro_rules! b_tree_map {
     ($($key:expr => $val:expr),* ,) => (
         $crate::b_tree_map!($($key => $val),*)
     );
     ($($key:expr => $val:expr),*) => ({
+        #[allow(unused_mut)]
         let mut map = ::std::collections::BTreeMap::new();
         $( map.insert($key, $val); )*
         map
     });
 }
 
+/// Macro to create a `BTreeSet` with a number of items in it.
+///
+/// # Examples
+///
+/// ```
+/// use common_macros::b_tree_set;
+///
+/// let is_fun_set = b_tree_set!{ "joke", "cat" };
+/// ```
 #[macro_export]
 macro_rules! b_tree_set {
     ($($item:expr),* ,) => (
         $crate::b_tree_set!($($item),*)
     );
     ($($item:expr),*) => ({
+        #[allow(unused_mut)]
         let mut set = ::std::collections::BTreeSet::new();
         $( set.insert($item); )*
         set
