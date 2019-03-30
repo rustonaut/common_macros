@@ -1,6 +1,6 @@
 [package]
 name = "common_macros"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Philipp Korber <philippkorber@gmail.com>"]
 description = "Provides common macros like `hash_map!` or `hash_set!` (WIP)"
 edition = "2018"
